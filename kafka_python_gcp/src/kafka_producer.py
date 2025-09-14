@@ -16,19 +16,41 @@ class IrisDataProducer:
                  kafka_servers: str,
                  topic: str = "iris-inference-data",
                  batch_size: int = 10,
-                 delay_seconds: float = 5.0):
+                 delay_seconds: float = 5.0,
+                 use_gcp_auth: bool = False):
         self.kafka_servers = kafka_servers
         self.topic = topic
         self.batch_size = batch_size
         self.delay_seconds = delay_seconds
         
-        # Load GCP service account for SASL authentication
+        if use_gcp_auth:
+            self.producer = self._create_gcp_producer()
+        else:
+            self.producer = self._create_local_producer()
+    
+    def _create_local_producer(self) -> KafkaProducer:
+        """Create Kafka producer for local development."""
+        logger.info("Using local Kafka configuration")
+        return KafkaProducer(
+            bootstrap_servers=self.kafka_servers,
+            value_serializer=lambda v: json.dumps(v).encode('utf-8'),
+            key_serializer=lambda k: str(k).encode('utf-8') if k else None,
+            retries=5,
+            retry_backoff_ms=100,
+            request_timeout_ms=30000,
+            security_protocol='PLAINTEXT'
+        )
+    
+    def _create_gcp_producer(self) -> KafkaProducer:
+        """Create Kafka producer for GCP Managed Kafka."""
         import base64
         import os
         from pathlib import Path
         
+        logger.info("Using GCP Managed Kafka configuration")
+        
         # Path to service account key
-        key_path = Path(__file__).parent.parent.parent.parent / "deeplearning-sahil-e50332de6687.json"
+        key_path = Path(__file__).parent.parent.parent.parent / "gcp-key.json"
         
         if key_path.exists():
             with open(key_path, 'r') as f:
@@ -38,20 +60,19 @@ class IrisDataProducer:
         else:
             raise FileNotFoundError(f"Service account key not found at {key_path}")
         
-        self.producer = KafkaProducer(
-            bootstrap_servers=kafka_servers,
+        return KafkaProducer(
+            bootstrap_servers=self.kafka_servers,
             value_serializer=lambda v: json.dumps(v).encode('utf-8'),
             key_serializer=lambda k: str(k).encode('utf-8') if k else None,
             retries=5,
             retry_backoff_ms=100,
             request_timeout_ms=30000,
-            # SASL authentication for GCP Managed Kafka
             security_protocol='SASL_SSL',
             sasl_mechanism='PLAIN',
             sasl_plain_username=sasl_username,
             sasl_plain_password=sasl_password,
-            ssl_check_hostname=False,  # Disable for localhost tunnel
-            ssl_cafile=None  # Uses system CA certificates
+            ssl_check_hostname=False,
+            ssl_cafile=None
         )
         
     def generate_iris_sample(self) -> Dict[str, Any]:
@@ -130,7 +151,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Generate random Iris data for Kafka')
     parser.add_argument('--kafka-servers', required=True,
-                       help='Kafka bootstrap servers (e.g., GCP Managed Kafka endpoint)')
+                       help='Kafka bootstrap servers (e.g., localhost:9092 or GCP endpoint)')
     parser.add_argument('--topic', default='iris-inference-data',
                        help='Kafka topic name')
     parser.add_argument('--batch-size', type=int, default=10,
@@ -139,6 +160,8 @@ def main():
                        help='Delay between batches in seconds')
     parser.add_argument('--duration', type=int, default=None,
                        help='Duration in minutes (infinite if not specified)')
+    parser.add_argument('--use-gcp-auth', action='store_true',
+                       help='Use GCP authentication for managed Kafka (default: local)')
     
     args = parser.parse_args()
     
@@ -146,7 +169,8 @@ def main():
         kafka_servers=args.kafka_servers,
         topic=args.topic,
         batch_size=args.batch_size,
-        delay_seconds=args.delay
+        delay_seconds=args.delay,
+        use_gcp_auth=args.use_gcp_auth
     )
     
     producer.start_continuous_production(duration_minutes=args.duration)
