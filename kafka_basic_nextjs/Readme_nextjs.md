@@ -1,53 +1,50 @@
 # Kafka Basic Next.js Example
 
 This project demonstrates basic Kafka producer and consumer functionality using Node.js and KafkaJS.
-
-## Prerequisites
-
-1. **Apache Kafka Setup**
-   - Download and install Apache Kafka from [kafka.apache.org](https://kafka.apache.org/downloads)
-   - Or use Docker: `docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=127.0.0.1 --env ADVERTISED_PORT=9092 spotify/kafka`
-
-2. **Node.js**
-   - Node.js version 12 or higher
+Video Reference - https://www.youtube.com/watch?v=ZJJHm_bd9Zo
 
 ## Local Kafka Setup Steps
 
-### 1. Start Zookeeper
+
+### 1. Install KafkaJS
 ```bash
-# Navigate to your Kafka directory
-cd /path/to/kafka
-
-# Start Zookeeper (required for Kafka)
-bin/zookeeper-server-start.sh config/zookeeper.properties
+npm install kafkajs
 ```
 
-### 2. Start Kafka Server
+### 2. Start Zookeeper Container and expose PORT 2181
 ```bash
-# In a new terminal, start Kafka server
-bin/kafka-server-start.sh config/server.properties
+# Start Zookeeper (required for Kafka) 
+docker run -p 2181:2181 zookeeper
 ```
 
-### 3. Update Broker Configuration
-Update the broker address in `client.js` to match your local setup:
-```javascript
-brokers: ["localhost:9092"]  // Change from current IP to localhost
-```
-
-## Project Setup
-
-### 1. Install Dependencies
+### 3. Start Kafka
 ```bash
-npm install
+# Get IP address for your machine
+docker run -p 9092:9092 \
+-e KAFKA_ZOOKEEPER_CONNECT=<PRIVATE_IP>:2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://<PRIVATE_IP>:9092 \
+-e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+confluentinc/cp-kafka
 ```
 
-### 2. Create Kafka Topic
+## Usage
+
+### Create Kafka Topic
 ```bash
 node admin.js
 ```
 This creates the `rider-updates1` topic with 2 partitions.
 
-## Usage
+### Start Kafka Producer
+```bash
+node producer.js
+```
+
+### Run multiple consumers
+Update the broker address in `client.js` to match your local setup:
+```bash
+node consumer.js <GROUP_NAME>
+```
 
 ### Running the Consumer
 Open a terminal and run:
@@ -77,9 +74,9 @@ The producer accepts input in the format: `<riderName> <location>`
 
 Example inputs:
 ```
-> Alice north
-> Bob south
-> Charlie north
+> sahil north
+> lisa south
+> andrew north
 ```
 
 ## File Structure
