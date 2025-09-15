@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import pandas as pd
 from kafka import KafkaConsumer
@@ -132,7 +132,7 @@ class KafkaBigQueryConsumer:
                 if message.value:
                     # Add ingestion timestamp
                     record = message.value
-                    record['ingestion_time'] = datetime.utcnow().isoformat()
+                    record['ingestion_time'] = datetime.now(timezone.utc).isoformat()
                     consumed_data.append(record)
                     
                     logger.info(f"Consumed message: {record['sample_id']}")

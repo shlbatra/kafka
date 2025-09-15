@@ -13,29 +13,31 @@ from pathlib import Path
 src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
-from ml_pipelines_kfp.iris_xgboost.constants import (
-    KAFKA_BOOTSTRAP_SERVERS_LOCAL,
-    KAFKA_TOPIC,
-    PROJECT_ID
-)
-from ml_pipelines_kfp.iris_xgboost.kafka_producer import IrisDataProducer
+
+from src.kafka_producer import IrisDataProducer
 
 
 def test_kafka_connection():
-    """Test connection to GCP Managed Kafka cluster."""
-    print("Testing GCP Managed Kafka configuration...")
+    """Test connection to GCP Managed Kafka cluster via SSH tunnel."""
+    PROJECT_ID = "deeplearning-sahil"
+    # Use localhost:9092 for SSH tunnel to GCP Managed Kafka
+    KAFKA_BOOTSTRAP_SERVERS_TUNNEL = "localhost:9092"
+    KAFKA_TOPIC = "iris-inference-data"
+    print("Testing GCP Managed Kafka configuration via SSH tunnel...")
     print(f"Project ID: {PROJECT_ID}")
-    print(f"Bootstrap servers: {KAFKA_BOOTSTRAP_SERVERS_LOCAL}")
+    print(f"Bootstrap servers (tunnel): {KAFKA_BOOTSTRAP_SERVERS_TUNNEL}")
     print(f"Topic: {KAFKA_TOPIC}")
+    print("Note: Requires SSH tunnel to be running on port 9092")
     
     try:
         # Test producer connection
         print("\nTesting Kafka producer connection...")
         producer = IrisDataProducer(
-            kafka_servers=KAFKA_BOOTSTRAP_SERVERS_LOCAL,
+            kafka_servers=KAFKA_BOOTSTRAP_SERVERS_TUNNEL,
             topic=KAFKA_TOPIC,
             batch_size=1,
-            delay_seconds=1.0
+            delay_seconds=1.0,
+            use_gcp_auth=False
         )
         
         # Send a single test message
@@ -68,7 +70,7 @@ def main():
     if success:
         print("✓ All tests passed! Your GCP Managed Kafka setup is ready.")
         print("\nNext steps:")
-        print("1. Run the producer: python src/ml_pipelines_kfp/iris_xgboost/kafka_producer.py --kafka-servers=\"{}\"".format(KAFKA_BOOTSTRAP_SERVERS_LOCAL))
+        print("1. Run the producer: python src/kafka_producer.py --kafka-servers=\"{}\".format("localhost:9092"))
         print("2. Test the KFP pipeline with Kafka data source")
     else:
         print("✗ Tests failed. Please check the configuration.")

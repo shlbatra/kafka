@@ -37,6 +37,8 @@ gcloud compute firewall-rules create allow-ssh-kafka-bastion \
     --project=$PROJECT_ID \
     --description="Allow SSH access to Kafka bastion host"
 
+# Create SSH tunnel (in separate terminal)
+# gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9092:bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
 
 echo "Bastion host setup complete!"
 echo ""
@@ -45,4 +47,4 @@ echo "gcloud compute ssh $BASTION_NAME --zone=$ZONE --project=$PROJECT_ID -- -L 
 echo "gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9092:bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N"
 echo ""
 echo "Then connect your Kafka client to localhost:9092"
-echo "Using existing service account key: deeplearning-sahil-e50332de6687.json"
+echo "Using existing service account key: gcp-key.json"

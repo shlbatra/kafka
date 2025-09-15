@@ -50,7 +50,7 @@ class IrisDataProducer:
         logger.info("Using GCP Managed Kafka configuration")
         
         # Path to service account key
-        key_path = Path(__file__).parent.parent.parent.parent / "gcp-key.json"
+        key_path = Path(__file__).parent / "gcp-key.json"
         
         if key_path.exists():
             with open(key_path, 'r') as f:

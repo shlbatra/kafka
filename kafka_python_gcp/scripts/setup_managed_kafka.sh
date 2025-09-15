@@ -47,8 +47,7 @@ BOOTSTRAP_SERVERS=$(gcloud managed-kafka clusters describe $CLUSTER_NAME \
     --location=$REGION \
     --project=$PROJECT_ID \
     --format="value(gcpConfig.bootstrapServers)")
-# bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092
-echo "python src/ml_pipelines_kfp/iris_xgboost/kafka_producer.py --kafka-servers="bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092""
+
 echo "Kafka cluster setup complete!"
 echo "Bootstrap servers: $BOOTSTRAP_SERVERS"
 echo ""
