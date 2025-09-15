@@ -1,8 +1,6 @@
-# kafka
+# Kafka
 
-Video reference
-https://www.youtube.com/watch?v=ZJJHm_bd9Zo
-
+Apache Kafka is a distributed streaming platform that handles real-time data feeds by publishing and subscribing to streams of records, similar to a message queue. It's designed for high-throughput, fault-tolerant processing of continuous data streams across distributed systems, commonly used for building real-time analytics and data pipelines.
 
 # Topics
 
