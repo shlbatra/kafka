@@ -39,6 +39,19 @@ gcloud compute firewall-rules create allow-ssh-kafka-bastion \
 
 # Create SSH tunnel (in separate terminal)
 # gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9092:bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
+# Terminal 1: Bootstrap server
+# gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9092:bootstrap.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
+
+# Terminal 2: Broker 0  
+# gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9093:broker-0.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
+
+# Terminal 3: Broker 1
+# gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9094:broker-1.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
+
+# Terminal 4: Broker 2
+# gcloud compute ssh kafka-bastion --zone=us-central1-a --project=deeplearning-sahil -- -L 9095:broker-2.iris-ml-cluster.us-central1.managedkafka.deeplearning-sahil.cloud.goog:9092 -N
+
+
 
 echo "Bastion host setup complete!"
 echo ""
